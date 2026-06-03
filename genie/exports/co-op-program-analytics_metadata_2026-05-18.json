@@ -1,0 +1,26 @@
+{
+  "created_timestamp": 1779136451583,
+  "description": "Steelcase COMPASS demo Genie space (Co-op Marketing Program Analytics \u0026 Strategy System).\n\nPersona: Maya, Channel Marketing Manager, AMER East — answers must read like a one-paragraph executive summary.\n\nDATA SHAPE CONVENTIONS (memorize these):\n- region IN ('AMER','EMEA','APAC')  -- 3 values, no sub-region info\n- sub_region IN ('East','West','Central','North','South')  -- 5 values\n- region_full IN ('AMER East','AMER West','AMER Central','EMEA North','EMEA South','EMEA East','APAC North','APAC South')  -- 8 values, the concatenation\n- When the user says 'AMER East' / 'EMEA North' / etc., ALWAYS match region_full FIRST. Do NOT split into region+sub_region unless the user explicitly asked.\n\nGROUNDING PREFERENCE:\n- Prefer compass_metric.* metric views over compass_gold.fact_* tables when they cover the same question. The metric views are the certified governed semantic.\n- Metric views REQUIRE MEASURE(...) wrapping for measure columns; never JOIN a metric view with another table.\n\nFY CONVENTION:\n- fiscal_year IN ('FY24','FY25','FY26'); never '2024'/'2026'.\n- Steelcase fiscal year runs March 1 to end of February. FY26 = Mar 2026 to Feb 2027.\n\nHERO NUMBERS (for sanity-check during demo):\n- AMER East FY26 expected_forfeit_usd ~ $1.62M across 23 dealers.\n- Top 3 at-risk dealers: Pivot Workplace Solutions, Halcyon Office Group, Northpoint Workspaces.\n- Top activity by revenue_per_coop_dollar in AMER East FY26: Programmatic Display ($7.40 / $1).\n\nDEALER-ID CONVENTIONS:\n- Hero cohort dealer IDs are D-04711 through D-04733 (AMER East).\n- Other dealers: D-01001 through D-01820.",
+  "display_name": "Co-op Program Analytics",
+  "folder_node_internal_name": "tree/1821611724923334",
+  "id": "01f152f8ed8a1682af57700b37fb11bb",
+  "last_updated_timestamp": 1779139653078,
+  "run_as_type": "VIEWER",
+  "space_id": "01f152f8ed8a1682af57700b37fb11bb",
+  "suggestion_description": "This space provides end-to-end analytics on co-op program performance, dealer activity, claim lifecycle, and revenue impact for Channel Marketing in the AMER East region.\n\n**Capabilities:**\n- Track co-op fund allocation, utilization, commitments, payments, and forfeiture across programs, dealers, and time periods.\n- Identify dealers at risk of forfeiting funds and analyze unused balances.\n- Measure dealer performance, including net revenue, co-op lift, and efficiency of co-op spend.\n- Review claim processing efficiency, approval rates, and cycle times by dealer, activity, and program.\n- Compare revenue impact across activity types to identify which co-op-funded activities deliver the best returns.\n\n**Limitations:**\n- Does not provide detailed transaction-level claim or activity data.\n- Attribution and analysis are focused on available summary metrics and may not reflect full underlying causal effects.\n- Limited to data and dealers within the AMER East region; other regions may not be comprehensively included.",
+  "suggestion_description_created_timestamp": 1779136454350,
+  "suggestion_description_status": "SUGGESTION_PROPOSED",
+  "table_identifiers": [
+    "classic_stable_1zia5t_kp_catalog.compass_gold.dim_activity_type",
+    "classic_stable_1zia5t_kp_catalog.compass_gold.dim_dealer",
+    "classic_stable_1zia5t_kp_catalog.compass_gold.dim_program",
+    "classic_stable_1zia5t_kp_catalog.compass_gold.dim_region",
+    "classic_stable_1zia5t_kp_catalog.compass_metric.activity_lift",
+    "classic_stable_1zia5t_kp_catalog.compass_metric.claim_lifecycle",
+    "classic_stable_1zia5t_kp_catalog.compass_metric.coop_program_metrics",
+    "classic_stable_1zia5t_kp_catalog.compass_metric.dealer_performance",
+    "classic_stable_1zia5t_kp_catalog.compass_metric.forfeiture_risk"
+  ],
+  "user_id": 6272604060652281,
+  "warehouse_id": "c2175995b9726f22"
+}

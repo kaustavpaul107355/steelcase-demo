@@ -1,0 +1,114 @@
+version: 0.1
+name: coop_program_metrics
+catalog: steelcase_demo
+schema: metric
+display_name: Co-op Program Metrics
+description: |
+  Governed program-health KPIs for Steelcase's dealer co-op marketing
+  program: allocated, committed, approved, paid, and unused dollars, plus
+  derived rates. This metric view is the single source of truth for any
+  "how is the program tracking?" question, anywhere in the company.
+  Grain: one row per dealer x program x fiscal_period x date_key.
+
+source: steelcase_demo.gold.fact_coop_utilization_daily
+
+joins:
+  - name: dealer
+    source: steelcase_demo.gold.dim_dealer
+    on: source.dealer_id = dealer.dealer_id
+  - name: program
+    source: steelcase_demo.gold.dim_program
+    on: source.program_id = program.program_id
+  - name: region
+    source: steelcase_demo.gold.dim_region
+    on: dealer.region_id = region.region_id
+  - name: fiscal
+    source: steelcase_demo.gold.dim_fiscal_calendar
+    on: source.date_key = fiscal.date_key
+
+dimensions:
+  - name: dealer_id
+    expr: source.dealer_id
+    description: Surrogate key for the dealer.
+  - name: dealer_name
+    expr: dealer.dealer_name
+    description: Human-readable dealer name. Synonyms: dealer, partner, dealership.
+  - name: tier
+    expr: dealer.tier
+    description: Dealer tier (Platinum, Gold, Silver, Authorized). Drives allocation formula and co-fund pct.
+  - name: region
+    expr: region.region
+    description: Geographic region. One of AMER, EMEA, APAC.
+  - name: sub_region
+    expr: region.sub_region
+    description: Sub-region. AMER East/West/Central, EMEA North/South/East, APAC North/South.
+  - name: country
+    expr: dealer.country
+    description: ISO-2 country code.
+  - name: program_id
+    expr: source.program_id
+  - name: program_name
+    expr: program.program_name
+    description: Human-readable program name. Synonyms: program, fund, initiative.
+  - name: fiscal_year
+    expr: source.fiscal_year
+    description: Steelcase fiscal year (Mar-Feb). Values FY24, FY25, FY26.
+  - name: fiscal_period
+    expr: source.fiscal_period
+    description: Fiscal period P01..P12 within a fiscal year.
+  - name: fiscal_quarter
+    expr: fiscal.fiscal_quarter
+    description: Fiscal quarter Q1..Q4.
+  - name: date_key
+    expr: source.date_key
+
+measures:
+  - name: allocated_usd
+    expr: SUM(source.allocated_usd)
+    description: Total co-op dollars allocated to the dealer for the program/period.
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: committed_usd
+    expr: SUM(source.committed_usd)
+    description: |
+      Dollars committed via claims in any non-terminal state
+      (Submitted, Under_Review, Approved, Paid). Excludes Draft, Rejected, Expired.
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: approved_usd
+    expr: SUM(source.approved_usd)
+    description: Dollars approved (claims in Approved or Paid).
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: paid_usd
+    expr: SUM(source.paid_usd)
+    description: Dollars actually paid out to dealers.
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: unused_usd
+    expr: SUM(source.unused_usd)
+    description: Allocated minus committed. Negative if over-committed (rare).
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: forfeited_usd
+    expr: SUM(source.forfeited_usd)
+    description: |
+      Dollars that expired unused at/after expiration_date. Only > 0 on/after the
+      program_end. Use this metric to discuss historical leakage.
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: utilization_rate
+    expr: SAFE_DIVIDE(SUM(source.paid_usd), NULLIF(SUM(source.allocated_usd), 0))
+    description: paid_usd / allocated_usd. Headline KPI for program health.
+    format: { type: percent, decimals: 1 }
+  - name: commitment_rate
+    expr: SAFE_DIVIDE(SUM(source.committed_usd), NULLIF(SUM(source.allocated_usd), 0))
+    description: committed_usd / allocated_usd. Leading indicator for utilization.
+    format: { type: percent, decimals: 1 }
+  - name: forfeiture_rate
+    expr: SAFE_DIVIDE(SUM(source.forfeited_usd), NULLIF(SUM(source.allocated_usd), 0))
+    description: forfeited_usd / allocated_usd. Inverse of effective utilization at FY-end.
+    format: { type: percent, decimals: 1 }
+
+# Genie synonyms — natural language hints
+synonyms:
+  utilization_rate: ["utilization", "burn rate", "drawn-down rate", "spend rate"]
+  forfeited_usd:    ["forfeiture", "leakage", "unused at year-end", "expired funds"]
+  paid_usd:         ["payout", "payments", "disbursed", "reimbursed"]
+  unused_usd:       ["balance", "available funds", "remaining funds"]
+  dealer_name:      ["dealer", "partner", "dealership", "channel partner"]
+  program_name:     ["program", "fund", "initiative", "co-op"]

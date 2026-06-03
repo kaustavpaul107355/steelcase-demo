@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.venv-*/
+*.egg
+
+# Node
+app/frontend/node_modules/
+
+# Databricks bundle local state
+.databricks/
+
+# Generated / local runtime artifacts
+app/mlruns/
+data/seed/
+*.log
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Secrets (never commit)
+.env
+.env.*
+*.pem

@@ -1,0 +1,14 @@
+# Curated table list for the "Co-op Utilization & Risk" Genie Space.
+# All FQNs in classic_stable_1zia5t_kp_catalog.
+catalog: classic_stable_1zia5t_kp_catalog
+tables:
+  # Metric views (certified semantic — preferred)
+  - compass_metric.forfeiture_risk
+  - compass_metric.claim_lifecycle
+  - compass_metric.coop_program_metrics
+  # Dim views (joins / lookups only — never JOIN to a metric view)
+  - compass_gold.dim_dealer
+  - compass_gold.dim_program
+  - compass_gold.dim_region
+  - compass_gold.dim_fiscal_calendar
+warehouse_id: c2175995b9726f22   # Serverless Starter Warehouse

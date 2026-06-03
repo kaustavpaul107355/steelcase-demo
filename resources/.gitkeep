@@ -1,0 +1,2 @@
+# Future home of per-resource YAML splits from databricks.yml
+# (jobs, pipelines, apps, serving endpoints) once the bundle grows.

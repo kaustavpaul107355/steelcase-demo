@@ -1,0 +1,77 @@
+version: 0.1
+name: activity_lift
+catalog: steelcase_demo
+schema: metric
+display_name: Activity-Level Lift / ROI
+description: |
+  Activity-type-level rollup of sell-through revenue attributed to co-op-funded
+  marketing. Use for "which activity types deliver the best lift?" — drives the
+  Act 6 "top-5 activities" turn of the COMPASS demo.
+
+  Grain: one row per activity_type x region x fiscal_year.
+
+  Lift methodology (v1.0-matched-tier-region):
+    Treated dealer-months are matched 1:N (N <= 5) to control dealer-months
+    in the same tier and region with no co-op-funded activity in the prior
+    60 days. attributed_revenue_usd = sum of treated revenue - mean(control
+    revenue), aggregated to activity_type. revenue_per_coop_dollar is the
+    headline ROI number. The methodology version is stored on every row so
+    downstream consumers know which model produced the figure.
+
+  This is intentionally a defensible mid-fidelity attribution, not a
+  peer-reviewed MMM. A future revision will replace it with a propensity
+  model trained on FY24/FY25 claim arrival curves — see open design
+  decision #7 in demo-design.md.
+
+source: steelcase_demo.gold.fact_activity_lift
+
+joins:
+  - name: activity
+    source: steelcase_demo.gold.dim_activity_type
+    on: source.activity_type_id = activity.activity_type_id
+  - name: region
+    source: steelcase_demo.gold.dim_region
+    on: source.region_id = region.region_id
+
+dimensions:
+  - name: activity_type_id
+    expr: source.activity_type_id
+  - name: activity_name
+    expr: activity.activity_name
+    description: Human-readable activity name. Synonyms - activity, tactic, channel.
+  - name: activity_category
+    expr: activity.category
+    description: One of Digital, Event, Showroom, Content, Sponsorship.
+  - name: region
+    expr: region.region
+  - name: sub_region
+    expr: region.sub_region
+  - name: fiscal_year
+    expr: source.fiscal_year
+  - name: lift_methodology_version
+    expr: source.lift_methodology_version
+
+measures:
+  - name: coop_paid_usd
+    expr: SUM(source.coop_paid_usd)
+    description: Co-op dollars paid for this activity type in this region / FY.
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: attributed_revenue_usd
+    expr: SUM(source.attributed_revenue_usd)
+    description: Sell-through revenue attributed to this activity type by the lift model.
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: revenue_per_coop_dollar
+    expr: SAFE_DIVIDE(SUM(source.attributed_revenue_usd), NULLIF(SUM(source.coop_paid_usd), 0))
+    description: |
+      Headline ROI - incremental revenue per co-op dollar. The Act 6 number.
+      Values above 1.0 mean the program is paying back; below 1.0 means it isn't.
+    format: { type: decimal, decimals: 2 }
+  - name: matched_pairs
+    expr: SUM(source.matched_pairs)
+    description: Total number of treated dealer-months that found a control match.
+
+synonyms:
+  revenue_per_coop_dollar:  ["ROI", "return on co-op", "ROAS", "lift", "revenue per dollar"]
+  attributed_revenue_usd:   ["incremental revenue", "marketing-driven revenue", "attributed sales"]
+  coop_paid_usd:            ["co-op spend", "marketing spend"]
+  activity_name:            ["activity", "tactic", "channel", "marketing channel"]

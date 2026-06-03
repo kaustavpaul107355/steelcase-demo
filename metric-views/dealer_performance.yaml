@@ -1,0 +1,78 @@
+version: 0.1
+name: dealer_performance
+catalog: steelcase_demo
+schema: metric
+display_name: Dealer Sell-Through Performance with Co-op Attribution
+description: |
+  Monthly dealer sell-through with attributed co-op spend and lift-vs-control.
+
+  Lift methodology (v1.0):
+    For each treated dealer-month (a dealer that received any co-op-funded
+    activity in the prior 60 days), we identify up to 5 matched control
+    dealer-months from the same region+tier with no recent co-op-funded
+    activity. attributed_coop_usd_lift = treated revenue - mean(control revenue).
+    lift_vs_control_pct = lift / mean(control revenue).
+
+  This is intentionally a defensible mid-fidelity attribution; not a peer-
+  reviewed MMM. The methodology version is stored in the gold table so
+  consumers know which model produced the number.
+
+source: steelcase_demo.gold.fact_dealer_performance_monthly
+
+joins:
+  - name: dealer
+    source: steelcase_demo.gold.dim_dealer
+    on: source.dealer_id = dealer.dealer_id
+  - name: region
+    source: steelcase_demo.gold.dim_region
+    on: dealer.region_id = region.region_id
+
+dimensions:
+  - name: dealer_id
+    expr: source.dealer_id
+  - name: dealer_name
+    expr: dealer.dealer_name
+  - name: tier
+    expr: dealer.tier
+  - name: region
+    expr: region.region
+  - name: sub_region
+    expr: region.sub_region
+  - name: country
+    expr: dealer.country
+  - name: month
+    expr: source.month
+  - name: fiscal_year
+    expr: source.fiscal_year
+
+measures:
+  - name: net_revenue_usd
+    expr: SUM(source.net_revenue_usd)
+    description: Dealer sell-through revenue (net) for the month.
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: coop_paid_usd
+    expr: SUM(source.coop_paid_usd)
+    description: Co-op dollars paid to the dealer in the month.
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: attributed_coop_usd_lift
+    expr: SUM(source.attributed_coop_usd_lift)
+    description: Estimated incremental revenue attributable to co-op-funded marketing in the prior 60 days.
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: revenue_per_coop_dollar
+    expr: SAFE_DIVIDE(SUM(source.attributed_coop_usd_lift), NULLIF(SUM(source.coop_paid_usd), 0))
+    description: |
+      Incremental revenue per co-op dollar. The headline ROI number. Values
+      above 1.0 mean the program is paying back; below 1.0 means it isn't.
+    format: { type: decimal, decimals: 2 }
+  - name: lift_vs_control_pct
+    expr: AVG(source.lift_vs_control_pct)
+    description: |
+      Average lift vs matched control (NOT weighted; for weighted use
+      revenue_per_coop_dollar).
+    format: { type: percent, decimals: 1 }
+
+synonyms:
+  net_revenue_usd:            ["revenue", "sell-through", "sales", "top-line"]
+  attributed_coop_usd_lift:   ["lift", "incremental revenue", "marketing-driven revenue"]
+  revenue_per_coop_dollar:    ["ROI", "return on co-op", "revenue per dollar", "ROAS-equivalent"]
+  coop_paid_usd:              ["co-op spend", "marketing spend"]

@@ -1,0 +1,12 @@
+# Curated table list for the "Marketing Effectiveness & ROI" Genie Space.
+catalog: classic_stable_1zia5t_kp_catalog
+tables:
+  # Metric views (certified semantic — preferred)
+  - compass_metric.activity_lift
+  - compass_metric.dealer_performance
+  # Dim views (joins / lookups only — never JOIN to a metric view)
+  - compass_gold.dim_dealer
+  - compass_gold.dim_activity_type
+  - compass_gold.dim_region
+  - compass_gold.dim_fiscal_calendar
+warehouse_id: c2175995b9726f22   # Serverless Starter Warehouse

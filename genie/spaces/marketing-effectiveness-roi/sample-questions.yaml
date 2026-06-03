@@ -1,0 +1,30 @@
+starter:
+  - "Top 5 activities by revenue per co-op dollar in AMER East FY26."
+  - "Which activity categories deliver the best lift in EMEA?"
+  - "Compare monthly revenue for Silver vs Gold tier dealers in AMER East FY26."
+  - "Lift-vs-control percentage by region for FY26."
+  - "Activities with revenue_per_coop_dollar > $5 — what's the category breakdown?"
+
+certified:
+  - question: "Top 5 activities by revenue per co-op dollar in AMER East FY26."
+    intent: "Activity ladder — should lead with Programmatic Display at $7.40/$1."
+    primary_view: compass_metric.activity_lift
+    joins: ["dim_activity_type (for activity_name)"]
+  - question: "Which activity categories deliver the best lift?"
+    intent: "Group by dim_activity_type.category; rank by avg revenue_per_coop_dollar."
+    primary_view: compass_metric.activity_lift
+    joins: ["dim_activity_type (for category)"]
+  - question: "Monthly net revenue trend for AMER East FY26 dealers by tier."
+    intent: "Use dealer_performance metric view; group by tier and month."
+    primary_view: compass_metric.dealer_performance
+  - question: "Attributed revenue from Programmatic Display in EMEA across FY24/FY25/FY26."
+    intent: "Filter activity_lift to ACT-DIG-PROG-DISPLAY in EMEA; show all 3 FYs."
+    primary_view: compass_metric.activity_lift
+
+exploration:
+  - "Average revenue per co-op dollar by region (FY26)."
+  - "Which dealer tier generates the highest attributed lift per claim?"
+  - "Compare Digital vs Event activity categories — which has higher lift?"
+  - "Top 10 dealers by net revenue in AMER East FY26."
+  - "How does Hybrid Zone showroom refresh compare to generic refresh?"
+  - "Total attributed_revenue_usd by FY for AMER East."

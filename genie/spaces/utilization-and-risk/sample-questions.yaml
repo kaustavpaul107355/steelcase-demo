@@ -1,0 +1,32 @@
+# Sample questions — surfaced as starter prompts in the Genie UI.
+# Mix of certified (high-confidence + paired SQL example) and starter (exploratory).
+# Keep total ≤ 15; first 5 are the "starter chips" the app surfaces.
+starter:
+  - "What's my Q4 forfeiture risk?"
+  - "Show me 23 AMER East dealers with their balance, expiration, and current YTD utilization."
+  - "How many claims are stuck in Under_Review for AMER East?"
+  - "Total allocated vs. paid for the FY26 main co-op program by region."
+  - "Average claim cycle time for Tier-Silver dealers in AMER East."
+
+certified:
+  - question: "What's my Q4 forfeiture risk?"
+    intent: "AMER East FY26 expected_forfeit_usd; should hit ~$1.62M."
+    primary_view: compass_metric.forfeiture_risk
+  - question: "Which 23 dealers are driving the forfeiture risk in AMER East FY26?"
+    intent: "Top-23 by unused_usd descending; expect Pivot/Halcyon/Northpoint at the top."
+    primary_view: compass_metric.forfeiture_risk
+    joins: ["dim_dealer (for dealer_name, tier)"]
+  - question: "Show claim approval cycle time by tier."
+    intent: "Median total_cycle_days grouped by tier."
+    primary_view: compass_metric.claim_lifecycle
+  - question: "Which AMER East dealers have allocation expiring within 60 days?"
+    intent: "Filter forfeiture_risk where days_to_expiration BETWEEN 0 AND 60."
+    primary_view: compass_metric.forfeiture_risk
+
+exploration:
+  - "Count of claims by status for FY26."
+  - "Total approved_usd by program for FY26."
+  - "Median brand_compliance_score by tier."
+  - "Which programs have the highest unused balance globally?"
+  - "Compare claim rejection rates between AMER and EMEA."
+  - "First-pass approval rate by region (FY26)."

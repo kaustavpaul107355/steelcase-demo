@@ -1,0 +1,242 @@
+# =====================================================================
+# Declarative Automation Bundle for the COMPASS demo
+#
+# Targets:
+#   - fevm (default) — live FEVM workspace (classic_stable_1zia5t_kp_catalog,
+#                      compass_* schemas). Where the demo actually runs.
+#   - prod          — production-shape blueprint targeting `steelcase_demo`
+#                     catalog with bare bronze/silver/gold/metric schemas
+#                     (per data/ddl/*.sql). Not deployed today.
+#
+# Resources:
+#   - compass_bronze_load       (job)     — 2 parallel tasks:
+#                                              hydrate_bronze_excel   → pipelines/00_hydrate_bronze_excel
+#                                              hydrate_bronze_parquet → pipelines/00_hydrate_bronze_parquet
+#   - compass_silver_gold       (pipeline) — Lakeflow Declarative Pipeline,
+#                                            serverless photon, Python SDP,
+#                                            file pipelines/sdp/silver_gold_pipeline.py
+# =====================================================================
+
+bundle:
+  name: compass-demo
+
+# Sync rules — overrides for the parent .gitignore which excludes `dist/` and
+# does NOT exclude `node_modules/` or local mlflow file-store output. The Apps
+# runtime needs `app/frontend/dist/` (static SPA assets); it does NOT need
+# `app/frontend/node_modules/` or any local mlflow artifacts.
+sync:
+  include:
+    - app/frontend/dist/**
+  exclude:
+    - app/frontend/node_modules/**
+    - app/mlruns/**
+    - "**/__pycache__/**"
+
+variables:
+  catalog_name:
+    description: UC catalog where the demo lives.
+    default: classic_stable_1zia5t_kp_catalog
+  bronze_schema:
+    description: Bronze schema name.
+    default: compass_bronze
+  silver_schema:
+    description: Silver schema name.
+    default: compass_silver
+  gold_schema:
+    description: Gold schema name.
+    default: compass_gold
+  as_of:
+    description: Snapshot date used by fact_coop_utilization_daily heuristics.
+    default: "2026-10-13"
+
+  # ---- Phase 7 app config ------------------------------------------------
+  compass_agent_mode:
+    description: lite | standard | full. Drives which downstream phases the app expects.
+    default: full
+  fm_endpoint:
+    description: Foundation model endpoint used by the embedded action-gate supervisor in full mode (ask-vs-do decision).
+    default: databricks-claude-sonnet-4-6
+  supervisor_endpoint:
+    description: Agent Bricks MAS endpoint (compass-supervisor) that owns read-side routing across the two Genie spaces + handbook KA in full mode.
+    default: mas-2a692b50-endpoint
+  warehouse_id:
+    description: SQL warehouse used for Genie SQL re-execution.
+    default: e6dc9b218651c48a
+  genie_space_util_risk_id:
+    description: Genie space — Co-op Utilization & Risk.
+    default: "01f152f8ed8a1682af57700b37fb11bb"
+  genie_space_marketing_id:
+    description: Genie space — Marketing Effectiveness & ROI.
+    default: "01f1532267c4147d9781fe17c1c6230f"
+  ka_endpoint:
+    description: Agent Bricks KA serving endpoint.
+    default: ka-f000ded6-endpoint
+  lakebase_host:
+    description: Lakebase Provisioned read-write DNS.
+    default: ep-raspy-credit-d2yhs2ud.database.us-east-1.cloud.databricks.com
+  lakebase_db:
+    description: Lakebase database name.
+    default: databricks_postgres
+  lakebase_instance:
+    description: Lakebase Provisioned instance name used to mint OAuth credentials.
+    default: compass-lakebase-prov
+  lakebase_user:
+    description: Postgres login the app should connect as. Empty in prod = derived from WorkspaceClient identity (App SP UUID); set for local dev only.
+    default: ""
+  mlflow_experiment_id:
+    description: MLflow experiment id (optional; tracing is skipped if unset). Path = /Shared/steelcase-demo/compass-experiment.
+    default: "1500085587181287"
+
+resources:
+
+  jobs:
+    compass_bronze_load:
+      name: compass-bronze-load
+      description: "Phase 1.5 — load all 8 compass_bronze.* tables. Two parallel tasks: hydrate_bronze_excel (4 fact tables ← compass-source.xlsx sheets) and hydrate_bronze_parquet (4 reference/master tables ← seed parquets). Idempotent (mode=overwrite)."
+      tags:
+        project: compass
+        layer: bronze
+      max_concurrent_runs: 1
+      tasks:
+        - task_key: hydrate_bronze_excel
+          notebook_task:
+            notebook_path: ./pipelines/00_hydrate_bronze_excel.py
+          timeout_seconds: 600
+        - task_key: hydrate_bronze_parquet
+          notebook_task:
+            notebook_path: ./pipelines/00_hydrate_bronze_parquet.py
+          timeout_seconds: 600
+
+  apps:
+    compass_app:
+      name: compass-app
+      description: "Phase 7 — COMPASS Co-op Program Agent UI (React + FastAPI). Mode-aware: lite/standard/full selected by COMPASS_AGENT_MODE."
+      source_code_path: ./app
+      resources:
+        - name: compass-lakebase
+          description: "Lakebase Provisioned Postgres for COMPASS — chat memory, approvals, nudges."
+          database:
+            instance_name: ${var.lakebase_instance}
+            database_name: ${var.lakebase_db}
+            permission: CAN_CONNECT_AND_CREATE
+        - name: compass-warehouse
+          description: "SQL warehouse for Genie SQL re-execution."
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        - name: compass-ka
+          description: "Agent Bricks KA — Co-op Program Handbook."
+          serving_endpoint:
+            name: ${var.ka_endpoint}
+            permission: CAN_QUERY
+        - name: compass-mas
+          description: "Agent Bricks MAS — compass-supervisor (read-side routing)."
+          serving_endpoint:
+            name: ${var.supervisor_endpoint}
+            permission: CAN_QUERY
+        - name: compass-fm
+          description: "Foundation model for embedded action-gate supervisor."
+          serving_endpoint:
+            name: ${var.fm_endpoint}
+            permission: CAN_QUERY
+        - name: genie-util-risk
+          description: "Genie space — Co-op Utilization & Risk."
+          genie_space:
+            name: co-op-utilization-and-risk
+            space_id: ${var.genie_space_util_risk_id}
+            permission: CAN_VIEW
+        - name: genie-marketing
+          description: "Genie space — Marketing Effectiveness & ROI."
+          genie_space:
+            name: marketing-effectiveness-roi
+            space_id: ${var.genie_space_marketing_id}
+            permission: CAN_VIEW
+      config:
+        command:
+          - uvicorn
+          - backend.main:app
+          - --host
+          - 0.0.0.0
+          - --port
+          - "8000"
+        env:
+          - name: COMPASS_AGENT_MODE
+            value: ${var.compass_agent_mode}
+          - name: COMPASS_GENIE_SPACE_UTIL_RISK_ID
+            value: ${var.genie_space_util_risk_id}
+          - name: COMPASS_GENIE_SPACE_MARKETING_ID
+            value: ${var.genie_space_marketing_id}
+          - name: COMPASS_KA_ENDPOINT
+            value: ${var.ka_endpoint}
+          - name: COMPASS_WAREHOUSE_ID
+            value: ${var.warehouse_id}
+          - name: COMPASS_LAKEBASE_HOST
+            value: ${var.lakebase_host}
+          - name: COMPASS_LAKEBASE_DB
+            value: ${var.lakebase_db}
+          - name: COMPASS_LAKEBASE_INSTANCE
+            value: ${var.lakebase_instance}
+          - name: COMPASS_LAKEBASE_USER
+            value: ${var.lakebase_user}
+          - name: COMPASS_MLFLOW_EXPERIMENT_ID
+            value: ${var.mlflow_experiment_id}
+          - name: COMPASS_FM_ENDPOINT
+            value: ${var.fm_endpoint}
+          - name: COMPASS_SUPERVISOR_ENDPOINT
+            value: ${var.supervisor_endpoint}
+          - name: COMPASS_ALLOW_PERSONA_SWITCH
+            value: "true"
+          - name: COMPASS_CATALOG
+            value: ${var.catalog_name}
+          - name: COMPASS_GOLD_SCHEMA
+            value: ${var.gold_schema}
+
+  pipelines:
+    compass_silver_gold:
+      name: compass-silver-gold-pipeline
+      catalog: ${var.catalog_name}
+      schema: ${var.silver_schema}      # default schema; all targets use FQNs so this is a placeholder UC requires.
+      serverless: true
+      photon: true
+      channel: CURRENT
+      edition: ADVANCED
+      development: true
+      tags:
+        project: compass
+        layer: silver_gold
+      libraries:
+        - file:
+            path: ./pipelines/sdp/silver_gold_pipeline.py
+      configuration:
+        compass.catalog:       ${var.catalog_name}
+        compass.bronze_schema: ${var.bronze_schema}
+        compass.silver_schema: ${var.silver_schema}
+        compass.gold_schema:   ${var.gold_schema}
+        compass.as_of:         ${var.as_of}
+
+# ---------------------------------------------------------------------
+# Targets
+# ---------------------------------------------------------------------
+targets:
+
+  fevm:
+    mode: development
+    default: true
+    workspace:
+      host: https://fevm-classic-stable-1zia5t-kp.cloud.databricks.com
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/compass-demo/${bundle.target}
+
+  prod:
+    mode: production
+    workspace:
+      # Production-shape target — not wired today. Catalog/schemas declared
+      # in data/ddl/*.sql (steelcase_demo + bronze/silver/gold/metric/lakebase_sync).
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/compass-demo/${bundle.target}
+    permissions:
+      - user_name: ${workspace.current_user.userName}
+        level: CAN_MANAGE
+    variables:
+      catalog_name: steelcase_demo
+      bronze_schema: bronze
+      silver_schema: silver
+      gold_schema: gold

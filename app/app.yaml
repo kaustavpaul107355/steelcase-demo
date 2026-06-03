@@ -1,0 +1,80 @@
+# Databricks Apps runtime spec. Env values mirror the DAB variable defaults in
+# databricks.yml (kept in sync manually since the Apps platform does not
+# substitute `${var.*}` in app.yaml).
+command:
+  - uvicorn
+  - backend.main:app
+  - --host
+  - 0.0.0.0
+  - --port
+  - "8000"
+
+env:
+  - name: COMPASS_AGENT_MODE
+    value: full
+  - name: COMPASS_FM_ENDPOINT
+    value: databricks-claude-sonnet-4-6
+  - name: COMPASS_SUPERVISOR_ENDPOINT
+    value: mas-2a692b50-endpoint
+  - name: COMPASS_GENIE_SPACE_UTIL_RISK_ID
+    value: "01f152f8ed8a1682af57700b37fb11bb"
+  - name: COMPASS_GENIE_SPACE_MARKETING_ID
+    value: "01f1532267c4147d9781fe17c1c6230f"
+  - name: COMPASS_KA_ENDPOINT
+    value: ka-f000ded6-endpoint
+  - name: COMPASS_WAREHOUSE_ID
+    value: e6dc9b218651c48a
+  - name: COMPASS_LAKEBASE_HOST
+    value: ep-raspy-credit-d2yhs2ud.database.us-east-1.cloud.databricks.com
+  - name: COMPASS_LAKEBASE_DB
+    value: databricks_postgres
+  - name: COMPASS_LAKEBASE_INSTANCE
+    value: compass-lakebase-prov
+  - name: COMPASS_MLFLOW_EXPERIMENT_ID
+    value: "1500085587181287"
+  - name: COMPASS_ALLOW_PERSONA_SWITCH
+    value: "true"
+  - name: COMPASS_CATALOG
+    value: classic_stable_1zia5t_kp_catalog
+  - name: COMPASS_GOLD_SCHEMA
+    value: compass_gold
+
+resources:
+  - name: compass-lakebase
+    description: "Lakebase Provisioned Postgres for COMPASS — chat memory, approvals, nudges."
+    database:
+      instance_name: compass-lakebase-prov
+      database_name: databricks_postgres
+      permission: CAN_CONNECT_AND_CREATE
+  - name: compass-warehouse
+    description: "SQL warehouse for Genie SQL re-execution."
+    sql_warehouse:
+      id: e6dc9b218651c48a
+      permission: CAN_USE
+  - name: compass-ka
+    description: "Agent Bricks KA — Co-op Program Handbook."
+    serving_endpoint:
+      name: ka-f000ded6-endpoint
+      permission: CAN_QUERY
+  - name: compass-mas
+    description: "Agent Bricks MAS — compass-supervisor."
+    serving_endpoint:
+      name: mas-2a692b50-endpoint
+      permission: CAN_QUERY
+  - name: compass-fm
+    description: "Foundation model for embedded action-gate supervisor."
+    serving_endpoint:
+      name: databricks-claude-sonnet-4-6
+      permission: CAN_QUERY
+  - name: genie-util-risk
+    description: "Genie space — Co-op Utilization & Risk."
+    genie_space:
+      name: co-op-utilization-and-risk
+      space_id: "01f152f8ed8a1682af57700b37fb11bb"
+      permission: CAN_VIEW
+  - name: genie-marketing
+    description: "Genie space — Marketing Effectiveness & ROI."
+    genie_space:
+      name: marketing-effectiveness-roi
+      space_id: "01f1532267c4147d9781fe17c1c6230f"
+      permission: CAN_VIEW

@@ -1,0 +1,89 @@
+version: 0.1
+name: claim_lifecycle
+catalog: steelcase_demo
+schema: metric
+display_name: Claim Lifecycle SLAs
+description: |
+  Claim approval cycle-time metrics, broken down by state transition. Use
+  for "how long does it take to approve a claim?", "where is the bottleneck?",
+  "what is our first-pass approval rate?", and reviewer-load questions.
+
+  Cycle stages:
+    submission -> review            (intake queue)
+    review -> decision              (reviewer time-in-state)
+    decision -> payment             (finance time-in-state)
+    total_cycle_days = sum of the three
+
+source: steelcase_demo.gold.fact_claim_sla
+
+joins:
+  - name: dealer
+    source: steelcase_demo.gold.dim_dealer
+    on: source.dealer_id = dealer.dealer_id
+  - name: program
+    source: steelcase_demo.gold.dim_program
+    on: source.program_id = program.program_id
+  - name: activity
+    source: steelcase_demo.gold.dim_activity_type
+    on: source.activity_type_id = activity.activity_type_id
+  - name: region
+    source: steelcase_demo.gold.dim_region
+    on: source.region_id = region.region_id
+
+dimensions:
+  - name: claim_id
+    expr: source.claim_id
+  - name: dealer_id
+    expr: source.dealer_id
+  - name: dealer_name
+    expr: dealer.dealer_name
+  - name: tier
+    expr: source.tier
+  - name: region
+    expr: region.region
+  - name: program_name
+    expr: program.program_name
+  - name: activity_category
+    expr: activity.category
+  - name: activity_name
+    expr: activity.activity_name
+  - name: final_status
+    expr: source.final_status
+  - name: fiscal_year
+    expr: source.fiscal_year
+  - name: submission_date
+    expr: source.submission_date
+
+measures:
+  - name: claims_submitted
+    expr: COUNT(*)
+  - name: claims_approved
+    expr: COUNT_IF(source.final_status IN ('Approved', 'Paid'))
+  - name: claims_rejected
+    expr: COUNT_IF(source.final_status = 'Rejected')
+  - name: claims_paid
+    expr: COUNT_IF(source.final_status = 'Paid')
+  - name: first_pass_approval_rate
+    expr: SAFE_DIVIDE(COUNT_IF(source.first_pass_approval = TRUE), NULLIF(COUNT(*), 0))
+    description: Fraction of submitted claims approved without a rework cycle.
+    format: { type: percent, decimals: 1 }
+  - name: cycle_time_days_p50
+    expr: PERCENTILE(source.total_cycle_days, 0.5)
+    description: Median total cycle time, submission to payment, business days.
+    format: { type: decimal, decimals: 1 }
+  - name: cycle_time_days_p90
+    expr: PERCENTILE(source.total_cycle_days, 0.9)
+    format: { type: decimal, decimals: 1 }
+  - name: time_in_review_p50
+    expr: PERCENTILE(source.days_review_to_decision, 0.5)
+    format: { type: decimal, decimals: 1 }
+  - name: time_to_pay_p50
+    expr: PERCENTILE(source.days_decision_to_payment, 0.5)
+    format: { type: decimal, decimals: 1 }
+
+synonyms:
+  cycle_time_days_p50:      ["median cycle time", "typical turnaround"]
+  cycle_time_days_p90:      ["worst-case cycle time", "p90 turnaround"]
+  first_pass_approval_rate: ["first-pass rate", "approval rate", "FPR"]
+  time_in_review_p50:       ["reviewer time", "time in review queue"]
+  time_to_pay_p50:          ["finance time", "time to disbursement"]

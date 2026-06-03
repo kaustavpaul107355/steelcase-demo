@@ -1,0 +1,87 @@
+version: 0.1
+name: forfeiture_risk
+catalog: steelcase_demo
+schema: metric
+display_name: Forfeiture Risk (current fiscal period)
+description: |
+  Current-period at-risk view: dealers / programs whose unused balance is
+  likely to expire unused. Drives the hero turn of the COMPASS demo
+  ("what's my Q4 forfeiture risk?").
+
+  expected_forfeit_usd is **precomputed in gold.fact_coop_utilization_daily**
+  (column of the same name) using a transparent two-band heuristic:
+
+    if program already expired:           expected = unused_usd  (recorded forfeiture)
+    if HIGH-RISK (active program):        expected = unused_usd  (essentially all at risk)
+       where HIGH-RISK = (days_to_expiration < 180)
+                    AND (paid_usd / allocated_usd < 0.6)
+    else (low-risk active program):       expected = unused_usd * (1 - util)^2 * 0.1
+
+  The two-band rule reflects historical FY24/FY25 evidence: dealers who are
+  under 60% utilized with fewer than 6 months left almost always forfeit;
+  dealers above 60% utilization rarely do. By precomputing in gold the metric
+  view stays fast and Genie-composable, and a future propensity model can
+  swap in without touching the metric view contract.
+
+source: steelcase_demo.gold.fact_coop_utilization_daily
+
+joins:
+  - name: dealer
+    source: steelcase_demo.gold.dim_dealer
+    on: source.dealer_id = dealer.dealer_id
+  - name: program
+    source: steelcase_demo.gold.dim_program
+    on: source.program_id = program.program_id
+  - name: region
+    source: steelcase_demo.gold.dim_region
+    on: dealer.region_id = region.region_id
+
+filters:
+  # Only the latest snapshot — forfeiture risk is "as of today".
+  - expr: source.date_key = (SELECT MAX(date_key) FROM steelcase_demo.gold.fact_coop_utilization_daily)
+
+dimensions:
+  - name: dealer_id
+    expr: source.dealer_id
+  - name: dealer_name
+    expr: dealer.dealer_name
+  - name: tier
+    expr: dealer.tier
+  - name: region
+    expr: region.region
+  - name: sub_region
+    expr: region.sub_region
+  - name: program_id
+    expr: source.program_id
+  - name: program_name
+    expr: program.program_name
+  - name: fiscal_year
+    expr: source.fiscal_year
+  - name: expiration_date
+    expr: source.date_key + INTERVAL source.days_to_expiration DAY
+
+measures:
+  - name: unused_balance_usd
+    expr: SUM(source.unused_usd)
+    description: Current unused balance per the latest daily snapshot.
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: days_to_expiration
+    expr: MIN(source.days_to_expiration)
+    description: Days until program/allocation expiration.
+    format: { type: decimal, decimals: 0 }
+  - name: expected_forfeit_usd
+    expr: SUM(source.expected_forfeit_usd)
+    description: |
+      Probabilistic estimate of dollars that will expire unused at FY-end.
+      Precomputed in gold.fact_coop_utilization_daily; see this view's
+      description for the heuristic.
+    format: { type: currency, currency_code: USD, decimals: 0 }
+  - name: dealers_at_risk_count
+    expr: COUNT(DISTINCT CASE WHEN source.unused_usd > 0 AND source.days_to_expiration < 90 THEN source.dealer_id END)
+    description: Number of distinct dealers with non-zero unused balance and <90 days to expiration.
+
+synonyms:
+  unused_balance_usd:    ["balance", "available funds", "remaining funds"]
+  expected_forfeit_usd:  ["forfeiture risk", "leakage", "expected unused at year-end"]
+  dealers_at_risk_count: ["at-risk dealers", "dealers about to forfeit", "underperforming dealers"]
+  days_to_expiration:    ["time left", "deadline", "window"]
