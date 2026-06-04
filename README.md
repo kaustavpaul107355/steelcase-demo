@@ -14,6 +14,7 @@ This directory builds out the **Co-op Program Analytics Agent ("COMPASS")** demo
 | `demo-design.md` | **HOW we'll build it.** Design decisions, source-dataset inventory with type/volume, identifier schemes, routing rules, scorer contracts. |
 | `storyline.md` | Narrative: 7-act story Maya lives through during the demo. |
 | `click-script.md` | Presenter's click-by-click script — what to click, what to say, fallback paths. |
+| `presentation/` | Self-contained HTML slide deck (10 slides); open `presentation/index.html`. Supports drag-drop screenshots/GIFs/videos with per-slot galleries. |
 | `data/data-model.md` | Logical + physical data model, ERD, grain, column dictionary. |
 | `data/ddl/` | Bronze / Silver / Gold DDL. |
 | `data/generate-synthetic-data.py` | Polars + Mimesis data generator (~28k claims, ~480k order lines). **Pins 23 AMER East hero dealers (`D-04711..D-04733`) summing to ~$1.62M unused.** Also emits `seed/compass-source.xlsx` (4 sheets) used by the Phase 1.5 bronze pipeline. |

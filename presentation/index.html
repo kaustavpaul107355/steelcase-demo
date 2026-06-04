@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COMPASS — Co-op Program Analytics Agent</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">◆</span>
+      <span class="brand-name">COMPASS</span>
+      <span class="brand-sub">Co-op Program Analytics Agent · Steelcase demo</span>
+    </div>
+    <div class="topbar-actions">
+      <button id="btn-export" class="btn-ghost" title="Download all attached images/GIFs as a JSON file">Export media</button>
+      <button id="btn-import" class="btn-ghost" title="Load images/GIFs from a previously exported JSON file">Import media</button>
+      <button id="btn-fs" class="btn-ghost" title="Toggle fullscreen (f)">⤢ Fullscreen</button>
+      <input id="import-file" type="file" accept="application/json" hidden />
+    </div>
+  </header>
+
+  <!-- Slide stage -->
+  <main id="stage">
+
+    <!-- 1 · Title -->
+    <section class="slide slide-title" data-title="Title">
+      <div class="slide-inner center">
+        <div class="kicker">Databricks · Field Engineering demo</div>
+        <h1>COMPASS</h1>
+        <p class="lead">Co-op Marketing Program Analytics &amp; Strategy System</p>
+        <p class="sub">A conversational analytics agent that unifies governed metrics, policy knowledge, and write-back actions on one platform.</p>
+        <div class="pill-row">
+          <span class="pill">Genie</span>
+          <span class="pill">Agent Bricks KA</span>
+          <span class="pill">Supervisor MAS</span>
+          <span class="pill">Lakebase</span>
+          <span class="pill">Databricks Apps</span>
+          <span class="pill">MLflow</span>
+        </div>
+        <p class="footnote">Synthetic data only · No real Steelcase customer information</p>
+      </div>
+    </section>
+
+    <!-- 2 · The problem -->
+    <section class="slide" data-title="The problem">
+      <div class="slide-inner two-col">
+        <div class="col">
+          <div class="kicker">The problem</div>
+          <h2>$1.62M is about to be forfeited — and nobody can see it</h2>
+          <ul class="bullets">
+            <li>Co-op marketing funds for <strong>AMER East FY26</strong> are sitting <strong>~45% unused</strong>, ~138 days from expiry.</li>
+            <li>The answer lives across <strong>4 disconnected systems</strong>: SFDC, SAP/ERP, the dealer portal, and a pile of policy PDFs.</li>
+            <li>Maya (Channel Marketing Manager) needs <strong>numbers</strong>, <strong>policy</strong>, and the ability to <strong>act</strong> — today that's three tools and a week.</li>
+          </ul>
+          <div class="stat-row">
+            <div class="stat"><div class="stat-num">$1.62M</div><div class="stat-lbl">at risk of forfeiture</div></div>
+            <div class="stat"><div class="stat-num">23</div><div class="stat-lbl">hero dealers</div></div>
+            <div class="stat"><div class="stat-num">4</div><div class="stat-lbl">systems to consolidate</div></div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="media-slot" data-slot="problem" data-label="Before-state: 4-system sprawl screenshot / GIF"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 · Architecture -->
+    <section class="slide" data-title="Architecture">
+      <div class="slide-inner two-col">
+        <div class="col">
+          <div class="kicker">Solution</div>
+          <h2>One agent, three modalities, one platform</h2>
+          <ul class="bullets">
+            <li><strong>Genie</strong> — quantitative metrics over governed UC Metric Views.</li>
+            <li><strong>Agent Bricks KA</strong> — policy &amp; how-to, with enforced citations.</li>
+            <li><strong>Action tools</strong> — approve claims, send nudges, save views — backed by Lakebase.</li>
+            <li>A <strong>Supervisor MAS</strong> routes each turn; <strong>MLflow</strong> traces every one.</li>
+          </ul>
+          <p class="note">Lakebase writes are reverse-ETL'd back to Unity Catalog, so the next agent turn sees the action that was just taken.</p>
+        </div>
+        <div class="col">
+          <div class="media-slot" data-slot="architecture" data-label="Architecture diagram (drop your render here)"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · Data foundation -->
+    <section class="slide" data-title="Data foundation">
+      <div class="slide-inner two-col">
+        <div class="col">
+          <div class="kicker">Phase 1 · Data foundation</div>
+          <h2>Medallion on Unity Catalog</h2>
+          <ul class="bullets">
+            <li><strong>Bronze</strong> — 8 raw feeds (claims, ERP order lines, registrations, allocations + 4 reference tables).</li>
+            <li><strong>Silver</strong> — conformed, deduped, typed.</li>
+            <li><strong>Gold</strong> — 4 facts incl. <code>fact_coop_utilization_daily</code> with precomputed forfeiture risk.</li>
+            <li><strong>5 UC Metric Views</strong> — one governed definition of <code>utilization_rate</code> shared by Genie, the app, and Finance.</li>
+          </ul>
+          <p class="note">~10K claims · ~625K order lines · hero cohort sums to $1.62M unused, by construction.</p>
+        </div>
+        <div class="col">
+          <div class="media-slot" data-slot="data" data-label="Medallion / metric-view screenshot"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 · Genie -->
+    <section class="slide" data-title="Genie">
+      <div class="slide-inner two-col">
+        <div class="col">
+          <div class="kicker">Phase 3 · Quantitative</div>
+          <h2>Genie answers the &ldquo;how much&rdquo;</h2>
+          <ul class="bullets">
+            <li>Two spaces: <strong>Co-op Utilization &amp; Risk</strong> and <strong>Marketing Effectiveness &amp; ROI</strong>.</li>
+            <li>Natural language → SQL over the metric views, with the SQL on display.</li>
+            <li>Hero turn: <em>&ldquo;Which region has the most unused co-op funds at risk this fiscal year?&rdquo;</em> → AMER East, $1.62M.</li>
+          </ul>
+        </div>
+        <div class="col">
+          <div class="media-slot" data-slot="genie" data-label="Genie answer + SQL (GIF works great here)"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 · Knowledge Assistant -->
+    <section class="slide" data-title="Knowledge Assistant">
+      <div class="slide-inner two-col">
+        <div class="col">
+          <div class="kicker">Phase 4 · Qualitative</div>
+          <h2>The Knowledge Assistant answers the &ldquo;how&rdquo;</h2>
+          <ul class="bullets">
+            <li>Agent Bricks KA indexed over an <strong>8-document corpus</strong>: handbook, eligibility, claim playbook, brand spec, regional addenda, forfeiture policy, FAQ.</li>
+            <li>Every answer carries <strong><code>[KA-XXX-### §section]</code> citations</strong> — no policy claim without a source.</li>
+            <li>Audience- and region-scoped so dealers and internal staff see the right guidance.</li>
+          </ul>
+        </div>
+        <div class="col">
+          <div class="media-slot" data-slot="ka" data-label="KA answer with citation chips"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 · Supervisor + actions -->
+    <section class="slide" data-title="Supervisor &amp; actions">
+      <div class="slide-inner two-col">
+        <div class="col">
+          <div class="kicker">Phase 6 · Orchestration + write-back</div>
+          <h2>A supervisor routes; actions write back</h2>
+          <ul class="bullets">
+            <li>Hybrid <strong>Supervisor MAS</strong> (<code>compass-supervisor</code>) with 3 sub-agents: util/risk analyst, marketing analyst, handbook expert.</li>
+            <li>An embedded <strong>action gate</strong> handles approve-claim, send-nudge, save-view — each as a <strong>preview card the user confirms</strong> before any write.</li>
+            <li>Confirms write to <strong>Lakebase</strong>; the change flows back to UC for the next turn.</li>
+          </ul>
+        </div>
+        <div class="col">
+          <div class="media-slot" data-slot="mas" data-label="Tool-preview / approval card GIF"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 · The live app -->
+    <section class="slide" data-title="The app">
+      <div class="slide-inner two-col">
+        <div class="col">
+          <div class="kicker">Phase 7 · Databricks Apps</div>
+          <h2>It all ships as one app</h2>
+          <ul class="bullets">
+            <li>React + FastAPI on Databricks Apps — two-pane chat plus an Approvals / Nudges / Saved Views workbench.</li>
+            <li>Persona switcher (Maya / Eliot / Priya / Jordan / Renske) with role-specific KPI home tiles.</li>
+            <li>Tabbed chat: Auto (MAS routing), Genie Utilization, Genie Marketing, KA Handbook.</li>
+          </ul>
+          <p class="note">Live in <code>full</code> mode at compass-app-7474649050252844.aws.databricksapps.com</p>
+        </div>
+        <div class="col">
+          <div class="media-slot" data-slot="app" data-label="Live app walkthrough GIF"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 · What it proves -->
+    <section class="slide" data-title="What it proves">
+      <div class="slide-inner">
+        <div class="kicker">Outcomes</div>
+        <h2>What this demo proves</h2>
+        <div class="proof-grid">
+          <div class="proof"><div class="proof-n">1</div><div><strong>Platform consolidation</strong><span>One platform lands what spans 4 systems today.</span></div></div>
+          <div class="proof"><div class="proof-n">2</div><div><strong>Governed metrics</strong><span>One YAML definition of utilization, used everywhere.</span></div></div>
+          <div class="proof"><div class="proof-n">3</div><div><strong>Mixed-modality agent</strong><span>Quantitative + qualitative + action, routed by a supervisor.</span></div></div>
+          <div class="proof"><div class="proof-n">4</div><div><strong>OLTP + analytics flywheel</strong><span>Lakebase writes reverse-ETL back to UC.</span></div></div>
+          <div class="proof"><div class="proof-n">5</div><div><strong>Production-grade quality</strong><span>MLflow traces every turn; eval keeps it honest.</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 · Closing -->
+    <section class="slide slide-title" data-title="Thank you">
+      <div class="slide-inner center">
+        <div class="kicker">Thank you</div>
+        <h1>Let&rsquo;s navigate the program.</h1>
+        <p class="sub">Questions &amp; live demo</p>
+        <p class="repo-link">
+          <span class="repo-label">Demo repo</span>
+          <a href="https://github.com/kaustavpaul107355/steelcase-demo" target="_blank" rel="noopener noreferrer">github.com/kaustavpaul107355/steelcase-demo</a>
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom nav -->
+  <footer class="navbar">
+    <button id="btn-prev" class="nav-btn" aria-label="Previous slide">‹</button>
+    <div id="dots" class="dots"></div>
+    <button id="btn-next" class="nav-btn" aria-label="Next slide">›</button>
+    <div id="counter" class="counter">1 / 10</div>
+  </footer>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
