@@ -25,21 +25,83 @@
   <!-- Slide stage -->
   <main id="stage">
 
-    <!-- 1 · Title -->
-    <section class="slide slide-title" data-title="Title">
-      <div class="slide-inner center">
-        <div class="kicker">Databricks · Field Engineering demo</div>
-        <h1>COMPASS</h1>
-        <p class="lead">Co-op Marketing Program Analytics &amp; Strategy System</p>
-        <p class="sub">A conversational analytics agent that unifies governed metrics, policy knowledge, and write-back actions on one platform.</p>
-        <div class="pill-row">
-          <span class="pill">Genie</span>
-          <span class="pill">Agent Bricks KA</span>
-          <span class="pill">Supervisor MAS</span>
-          <span class="pill">Lakebase</span>
-          <span class="pill">Databricks Apps</span>
-          <span class="pill">MLflow</span>
-        </div>
+    <!-- 1 · Overview -->
+    <section class="slide slide-scroll" data-title="Overview">
+      <div class="slide-inner slide-doc">
+        <header class="doc-hero">
+          <div class="kicker">Steelcase · Channel Marketing · Databricks</div>
+          <h1>COMPASS</h1>
+          <p class="lead">Co-op Marketing Program Analytics &amp; Strategy System</p>
+          <p class="promise">Help channel marketing leaders see program health, understand the rules, and act before money is lost — in a single conversation, not four disconnected systems.</p>
+        </header>
+
+        <section class="doc-section">
+          <h2 class="section-title">The business problem</h2>
+          <p class="section-lead">Steelcase invests <strong>~$45–55M per year</strong> in dealer co-op marketing funds across <strong>~800 authorized dealers</strong> globally. The program reimburses approved activities — digital ads, trade shows, showroom refresh, events, sponsorships, and more.</p>
+          <p class="section-lead">Today, three problems erode ROI:</p>
+          <table class="data-table">
+            <thead>
+              <tr><th>Problem</th><th>What happens</th><th>Business impact</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Forfeiture leakage</strong></td>
+                <td>18–22% of allocated funds expire unused at fiscal year-end</td>
+                <td><strong>~$8–12M</strong> of marketing investment lost annually</td>
+              </tr>
+              <tr>
+                <td><strong>Slow, inconsistent claims</strong></td>
+                <td>Approvals average <strong>12.4 business days</strong>; policy lives in PDFs and email</td>
+                <td>Dealer friction, delayed reimbursement, compliance risk</td>
+              </tr>
+              <tr>
+                <td><strong>No defensible attribution</strong></td>
+                <td>“What sell-through did this co-op dollar drive?” requires a multi-week analyst project</td>
+                <td>Budget resets by negotiation, not evidence</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="section-lead">Channel marketing managers often learn about forfeiture risk <strong>after fiscal year-end — when it is too late</strong>. Program directors cannot defend ROI to Finance without a reproducible, governed metric story.</p>
+        </section>
+
+        <section class="doc-section">
+          <h2 class="section-title">What COMPASS intends to do</h2>
+          <p class="section-lead">COMPASS is a <strong>conversational program command center</strong> for co-op marketing — not another dashboard tab. It is designed so a channel marketing manager can, in <strong>one session</strong>:</p>
+          <ol class="numbered-list">
+            <li><strong>See</strong> — governed KPIs: utilization, forfeiture risk, claim backlog, sell-through lift</li>
+            <li><strong>Ask</strong> — program policy and eligibility questions with <strong>cited</strong> answers from the official handbook</li>
+            <li><strong>Act</strong> — draft dealer nudge campaigns, advance claim approvals, save views for executive reviews</li>
+          </ol>
+          <p class="note"><strong>Human-in-the-loop by design:</strong> the agent stages actions (draft nudge, approve claim); people confirm before anything is sent or paid.</p>
+        </section>
+
+        <section class="doc-section">
+          <h2 class="section-title">Who it&rsquo;s for</h2>
+          <table class="data-table">
+            <thead>
+              <tr><th>Role</th><th>What COMPASS gives them</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Channel Marketing Manager</td>
+                <td>Early forfeiture warning, dealer outreach, faster claim triage</td>
+              </tr>
+              <tr>
+                <td>Director, Dealer Programs</td>
+                <td>ROI narrative, fair program design, audit-ready metrics</td>
+              </tr>
+              <tr>
+                <td>Dealer marketing operations</td>
+                <td>Balance, eligibility, claim status — without calling the manufacturer</td>
+              </tr>
+              <tr>
+                <td>Finance / FP&amp;A</td>
+                <td>One definition of utilization and forfeiture, lineage to source</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
         <p class="footnote">Synthetic data only · No real Steelcase customer information</p>
       </div>
     </section>
@@ -91,7 +153,7 @@
     <section class="slide" data-title="Data foundation">
       <div class="slide-inner two-col">
         <div class="col">
-          <div class="kicker">Phase 1 · Data foundation</div>
+          <div class="kicker">Data foundation</div>
           <h2>Medallion on Unity Catalog</h2>
           <ul class="bullets">
             <li><strong>Bronze</strong> — 8 raw feeds (claims, ERP order lines, registrations, allocations + 4 reference tables).</li>
@@ -111,7 +173,7 @@
     <section class="slide" data-title="Genie">
       <div class="slide-inner two-col">
         <div class="col">
-          <div class="kicker">Phase 3 · Quantitative</div>
+          <div class="kicker">Quantitative</div>
           <h2>Genie answers the &ldquo;how much&rdquo;</h2>
           <ul class="bullets">
             <li>Two spaces: <strong>Co-op Utilization &amp; Risk</strong> and <strong>Marketing Effectiveness &amp; ROI</strong>.</li>
@@ -129,7 +191,7 @@
     <section class="slide" data-title="Knowledge Assistant">
       <div class="slide-inner two-col">
         <div class="col">
-          <div class="kicker">Phase 4 · Qualitative</div>
+          <div class="kicker">Qualitative</div>
           <h2>The Knowledge Assistant answers the &ldquo;how&rdquo;</h2>
           <ul class="bullets">
             <li>Agent Bricks KA indexed over an <strong>8-document corpus</strong>: handbook, eligibility, claim playbook, brand spec, regional addenda, forfeiture policy, FAQ.</li>
@@ -147,7 +209,7 @@
     <section class="slide" data-title="Supervisor &amp; actions">
       <div class="slide-inner two-col">
         <div class="col">
-          <div class="kicker">Phase 6 · Orchestration + write-back</div>
+          <div class="kicker">Orchestration + write-back</div>
           <h2>A supervisor routes; actions write back</h2>
           <ul class="bullets">
             <li>Hybrid <strong>Supervisor MAS</strong> (<code>compass-supervisor</code>) with 3 sub-agents: util/risk analyst, marketing analyst, handbook expert.</li>
@@ -165,7 +227,7 @@
     <section class="slide" data-title="The app">
       <div class="slide-inner two-col">
         <div class="col">
-          <div class="kicker">Phase 7 · Databricks Apps</div>
+          <div class="kicker">Databricks Apps</div>
           <h2>It all ships as one app</h2>
           <ul class="bullets">
             <li>React + FastAPI on Databricks Apps — two-pane chat plus an Approvals / Nudges / Saved Views workbench.</li>
@@ -180,18 +242,150 @@
       </div>
     </section>
 
-    <!-- 9 · What it proves -->
-    <section class="slide" data-title="What it proves">
-      <div class="slide-inner">
-        <div class="kicker">Outcomes</div>
-        <h2>What this demo proves</h2>
-        <div class="proof-grid">
-          <div class="proof"><div class="proof-n">1</div><div><strong>Platform consolidation</strong><span>One platform lands what spans 4 systems today.</span></div></div>
-          <div class="proof"><div class="proof-n">2</div><div><strong>Governed metrics</strong><span>One YAML definition of utilization, used everywhere.</span></div></div>
-          <div class="proof"><div class="proof-n">3</div><div><strong>Mixed-modality agent</strong><span>Quantitative + qualitative + action, routed by a supervisor.</span></div></div>
-          <div class="proof"><div class="proof-n">4</div><div><strong>OLTP + analytics flywheel</strong><span>Lakebase writes reverse-ETL back to UC.</span></div></div>
-          <div class="proof"><div class="proof-n">5</div><div><strong>Production-grade quality</strong><span>MLflow traces every turn; eval keeps it honest.</span></div></div>
-        </div>
+    <!-- 9 · Outcomes & architecture -->
+    <section class="slide slide-scroll" data-title="Outcomes &amp; architecture">
+      <div class="slide-inner slide-doc">
+        <div class="kicker">Outcomes · Architecture</div>
+        <h2 class="page-heading">From business outcomes to platform proof</h2>
+
+        <section class="doc-section">
+          <h2 class="section-title">What this demo proves</h2>
+          <div class="table-wrap">
+            <table class="data-table data-table-wide">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Business proof</th>
+                  <th>What the audience should believe</th>
+                  <th>How we demonstrate it</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td><strong>One platform replaces the sprawl</strong></td>
+                  <td>Co-op facts, policy corpus, and claim workflow can live on Databricks instead of CRM + ERP + portal + PDFs</td>
+                  <td>Single COMPASS app reads UC gold/metrics, KA corpus, and Lakebase workflow state</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td><strong>One definition of truth for KPIs</strong></td>
+                  <td>Finance and Marketing will never argue over three versions of utilization rate</td>
+                  <td>5 UC Metric Views in YAML — same definitions for Genie, app home tiles, and exports</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td><strong>Conversations beat dashboards</strong></td>
+                  <td>Channel managers ask questions; they don&rsquo;t navigate multi-tab BI</td>
+                  <td>Genie (2 spaces) + Knowledge Assistant (8-doc corpus) + Supervisor routing in the Auto tab</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td><strong>Analytics and operations connect</strong></td>
+                  <td>When a claim is approved or a nudge is queued, the next question sees updated state</td>
+                  <td>Lakebase for OLTP writes → synced views from UC gold → next agent turn</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td><strong>Production-grade agent quality</strong></td>
+                  <td>This is governable AI, not a chatbot demo</td>
+                  <td>MLflow trace on every turn; eval dataset + citation scorer for policy answers</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="doc-section">
+          <h2 class="section-title">Reference architecture</h2>
+          <p class="section-lead">COMPASS is three layers: <strong>governed data</strong> at the bottom, <strong>conversational intelligence</strong> in the middle, and a <strong>single app experience</strong> on top. Every business outcome maps to a concrete component.</p>
+
+          <div class="arch-stack">
+            <div class="arch-layer arch-layer-experience">
+              <div class="arch-layer-label">Experience</div>
+              <div class="arch-box arch-box-primary">Databricks App — COMPASS<br><span>React UI + FastAPI BFF · OAuth</span></div>
+            </div>
+            <div class="arch-connector">↓</div>
+            <div class="arch-layer arch-layer-intelligence">
+              <div class="arch-layer-label">Intelligence</div>
+              <div class="arch-row">
+                <div class="arch-box">Supervisor MAS<br><span>routes each turn</span></div>
+                <div class="arch-box">Action gate<br><span>ask vs act</span></div>
+              </div>
+              <div class="arch-row">
+                <div class="arch-box">Genie ×2<br><span>Utilization &amp; Risk · Marketing ROI</span></div>
+                <div class="arch-box">Knowledge Assistant<br><span>Program handbook corpus</span></div>
+                <div class="arch-box">Action tools<br><span>nudge · claim · save view</span></div>
+              </div>
+            </div>
+            <div class="arch-connector">↓</div>
+            <div class="arch-layer arch-layer-data">
+              <div class="arch-layer-label">Governed data</div>
+              <div class="arch-row">
+                <div class="arch-box">UC Metric Views ×5</div>
+                <div class="arch-box">Gold facts &amp; dims</div>
+                <div class="arch-box">Silver · Bronze</div>
+                <div class="arch-box">UC Volume<br><span>policy &amp; playbooks</span></div>
+              </div>
+            </div>
+            <div class="arch-connector">↕</div>
+            <div class="arch-layer arch-layer-oltp">
+              <div class="arch-layer-label">Operational state</div>
+              <div class="arch-row">
+                <div class="arch-box">Lakebase Postgres<br><span>chat · approvals · nudges · views</span></div>
+                <div class="arch-box">Synced UC views<br><span>dealer · utilization today</span></div>
+              </div>
+            </div>
+            <div class="arch-layer arch-layer-obs">
+              <div class="arch-box arch-box-muted">MLflow tracing + eval</div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Layer</th><th>Components</th><th>Business job</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Experience</strong></td>
+                  <td>Databricks App (compass-app)</td>
+                  <td>One login, persona-aware UI, chat + workbench (Approvals, Nudges, Saved Views)</td>
+                </tr>
+                <tr>
+                  <td><strong>Intelligence</strong></td>
+                  <td>Supervisor MAS, Genie (2 spaces), KA, action gate</td>
+                  <td>Route &ldquo;how much?&rdquo; → Genie; &ldquo;what&rsquo;s allowed?&rdquo; → KA; &ldquo;do something&rdquo; → staged tools</td>
+                </tr>
+                <tr>
+                  <td><strong>Semantic</strong></td>
+                  <td>5 UC Metric Views</td>
+                  <td>Certified KPIs: utilization, forfeiture, claim SLA, dealer performance, activity lift</td>
+                </tr>
+                <tr>
+                  <td><strong>Analytics</strong></td>
+                  <td>Bronze → Silver → Gold on Unity Catalog</td>
+                  <td>Single copy of co-op allocations, claims, sell-through, marketing events</td>
+                </tr>
+                <tr>
+                  <td><strong>Knowledge</strong></td>
+                  <td>8 markdown docs on UC Volume</td>
+                  <td>Handbook, eligibility, claim playbook, brand spec, regional addenda, FAQ</td>
+                </tr>
+                <tr>
+                  <td><strong>Operational</strong></td>
+                  <td>Lakebase Provisioned</td>
+                  <td>Fast writes for approvals and campaigns; human confirm before external effect</td>
+                </tr>
+                <tr>
+                  <td><strong>Quality</strong></td>
+                  <td>MLflow</td>
+                  <td>Trace every turn; eval scorers (e.g. policy citation present)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </section>
 
