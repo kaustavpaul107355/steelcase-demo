@@ -110,7 +110,7 @@ databricks bundle deploy --target dev
 
 ## Authors
 
-- Kaustav Paul (Lakeflow Connect EPL, AMER RCT) — design and asset authoring.
+- Kaustav Paul — design and asset authoring.
 
 Synthetic, demo-only. Not for external sharing without scrubbing the customer name.
 

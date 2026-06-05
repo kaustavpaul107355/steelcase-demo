@@ -22,7 +22,7 @@
 ---
 
 **Demo ID:** SC-DEMO-05
-**Owner:** Kaustav Paul (Lakeflow Connect EPL, AMER RCT)
+**Owner:** Kaustav Paul
 **Customer:** Steelcase Inc. (Furniture / Contract Office, Grand Rapids MI)
 **Created:** 2026-05-18
 **Status:** In construction
